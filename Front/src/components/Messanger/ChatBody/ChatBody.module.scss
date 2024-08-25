@@ -1,0 +1,8 @@
+@import "../../../assets/styles/mixins";
+@import "../../../assets/styles/variables";
+
+.chat_body{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}

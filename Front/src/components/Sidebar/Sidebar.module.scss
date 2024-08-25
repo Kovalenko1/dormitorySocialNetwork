@@ -1,0 +1,29 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(38, 38, 38, 1.00);
+  height: 100%;
+  width: auto;
+
+
+  .imagBarTop, .imagBarBottom {
+    display: flex;
+    padding: 1em;
+    width: 1.5em;
+  }
+
+  .imagBarTop {
+    flex-direction: column;
+    margin-top: 1em;
+    margin-bottom: auto;
+  }
+
+  .imagBarBottom {
+    flex-direction: column;
+  }
+
+  .img {
+    margin-top: 60px;
+    max-width: 100%;
+  }
+}

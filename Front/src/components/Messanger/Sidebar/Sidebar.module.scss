@@ -1,0 +1,91 @@
+@import "../../../assets/styles/mixins";
+@import "../../../assets/styles/variables";
+.chat_sidebar {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(38, 38, 38, 1.00);
+  width: 50%;
+
+  .search_bar_container {
+    @include flex-center;
+    height: 4.5em;
+    flex-direction: row;
+
+    .search_bar {
+      display: flex;
+      align-items: center;
+      background-color: $primary-color;
+      width: 90%;
+      border-radius: 100px;
+
+      .search_img_container {
+        @include flex-center;
+        margin: 5px;
+        height: 34px;
+        width: 34px;
+        background-color: $secondary-color;
+        border-radius: 100px;
+
+        .search_img {
+          height: 24px;
+          width: 24px;
+        }
+
+      }
+
+    }
+
+  }
+
+  .chat_list_and_folders {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid;
+    box-sizing: border-box;
+    flex-grow: 1;
+    overflow-y: auto;
+
+    .folders_container {
+      @include flex-center;
+      height: 3.2em;
+      background-color: $secondary-color;
+
+      .folders {
+        @include flex-center;
+        flex-direction: row;
+        height: 80%;
+        width: 90%;
+        background-color: $primary-color;
+        border-radius: 8px;
+
+        .chats_folder, .groups_folder {
+          @include flex-center;
+          height: 80%;
+          width: 50%;
+          font-size: 15px;
+          font-weight: 400;
+          color: rgba(255, 255, 255, 0.78);
+          border-radius: 6px;
+        }
+
+        .chats_folder {
+          margin-left: 5px;
+          background-color: $secondary-color;
+        }
+
+        .groups_folder {
+          margin-right: 5px;
+        }
+
+      }
+
+    }
+
+    .chat_list {
+      display: flex;
+      flex-direction: column;
+      background-color: #262626;
+    }
+
+  }
+}
