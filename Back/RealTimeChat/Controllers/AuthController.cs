@@ -36,9 +36,9 @@ namespace RealTimeChat.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody] AuthRequest request)
+        public IActionResult Auth([FromBody] AuthRequest request)
         {
-            var user = _context.users.FirstOrDefault(u => u.username == request.username && u.password == request.password);
+            var user = _context.users.FirstOrDefault(u => u.email == request.email && u.password == request.password);
 
             if (user == null)
             {
