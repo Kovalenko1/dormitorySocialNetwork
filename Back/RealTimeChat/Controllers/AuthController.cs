@@ -25,11 +25,10 @@ namespace RealTimeChat.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] User newUser)
         {
-            if (_context.users.Any(u => u.username == newUser.username))
+            if (_context.users.Any(u => u.Username == newUser.Username))
             {
                 return BadRequest("User already exists");
             }
-
             _context.users.Add(newUser);
             await _context.SaveChangesAsync();
             return Ok(newUser);
@@ -38,7 +37,7 @@ namespace RealTimeChat.Controllers
         [HttpPost("login")]
         public IActionResult Auth([FromBody] AuthRequest request)
         {
-            var user = _context.users.FirstOrDefault(u => u.email == request.email && u.password == request.password);
+            var user = _context.users.FirstOrDefault(u => u.Email == request.Email && u.Password == request.Password);
 
             if (user == null)
             {
@@ -49,8 +48,8 @@ namespace RealTimeChat.Controllers
             return Ok(new AuthResponse
             {
                 Token = token,
-                username = user.username,
-                role = user.role,
+                Username = user.Username,
+                Role = user.Role,
             });
         }
 
@@ -58,10 +57,10 @@ namespace RealTimeChat.Controllers
         {
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.username),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Username),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.id.ToString()),
-                new Claim(ClaimTypes.Role, user.role)
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.Role)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));

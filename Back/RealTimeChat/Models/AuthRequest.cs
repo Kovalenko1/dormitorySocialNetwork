@@ -4,7 +4,7 @@ namespace RealTimeChat.Models
 {
     public class AuthRequest
     {
-        public string email { get; set; }
-        public string password { get; set; }
+        public required string Email { get; set; }
+        public required string Password { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../../slices/authSlice';
+import { login } from '../../store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 // import { useDispatch } from 'react-redux';
 // import { useNavigate } from 'react-router-dom';
@@ -31,7 +31,7 @@ export const Auth = () => {
         const resultAction = await dispatch(login({ email, password }));
 
         if (login.fulfilled.match(resultAction)) {
-            navigate('/'); // Navigate to the main page upon successful login
+            navigate('/');
         }
     };
 

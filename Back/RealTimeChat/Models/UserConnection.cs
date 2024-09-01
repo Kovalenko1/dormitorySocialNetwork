@@ -7,7 +7,7 @@ namespace RealTimeChat.Models;
 public class UserConnection
 {
     [Key]
-    public string connectionId { get; set; }
-    public string userName { get; set; }
-    public string chatRoom { get; set; }
+    public required string ConnectionId { get; set; }
+    public required string Username { get; set; }
+    public required string ChatRoom { get; set; }
 }

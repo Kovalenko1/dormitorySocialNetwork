@@ -4,8 +4,8 @@ namespace RealTimeChat.Models
 {
     public class AuthResponse
     {
-        public string Token { get; set; }
-        public string username { get; set; }
-        public string role { get; set; }
+        public required string Token { get; set; }
+        public required string Username { get; set; }
+        public required string Role { get; set; }
     }
 }

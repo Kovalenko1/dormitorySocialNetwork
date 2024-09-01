@@ -1,4 +1,4 @@
-import { logout } from '../../slices/authSlice';
+import { logout } from '../../store/slices/authSlice';
 import {useDispatch} from "react-redux";
 import { useNavigate } from 'react-router-dom';
 import styles from './Sidebar.module.scss';

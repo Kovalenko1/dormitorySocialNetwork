@@ -1,11 +1,7 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Caching.Distributed;
 using RealTimeChat.Models;
 using Microsoft.EntityFrameworkCore;
 using RealTimeChat.Data;
-using RealTimeChat.Models;
-
 namespace RealTimeChat.Hubs;
 
 public interface IChatClient
@@ -24,9 +20,9 @@ public class ChatHub : Hub<IChatClient>
 
         public async Task JoinChat(UserConnection connection)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, connection.chatRoom);
+            await Groups.AddToGroupAsync(Context.ConnectionId, connection.ChatRoom);
 
-            connection.connectionId = Context.ConnectionId;
+            connection.ConnectionId = Context.ConnectionId;
             _context.UserConnections.Add(connection);
             await _context.SaveChangesAsync();
 
@@ -38,26 +34,26 @@ public class ChatHub : Hub<IChatClient>
         public async Task SendMessage(string message)
         {
             var connection = await _context.UserConnections
-                .FirstOrDefaultAsync(c => c.connectionId == Context.ConnectionId);
+                .FirstOrDefaultAsync(c => c.ConnectionId == Context.ConnectionId);
 
             if (connection is not null)
             {
                 await Clients
-                    .Group(connection.chatRoom)
-                    .ReceiveMessage(connection.userName, message);
+                    .Group(connection.ChatRoom)
+                    .ReceiveMessage(connection.Username, message);
             }
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             var connection = await _context.UserConnections
-                .FirstOrDefaultAsync(c => c.connectionId == Context.ConnectionId);
+                .FirstOrDefaultAsync(c => c.ConnectionId == Context.ConnectionId);
 
             if (connection is not null)
             {
                 _context.UserConnections.Remove(connection);
                 await _context.SaveChangesAsync();
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, connection.chatRoom);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, connection.ChatRoom);
 
                 //await Clients
                 //    .Group(connection.chatRoom)
