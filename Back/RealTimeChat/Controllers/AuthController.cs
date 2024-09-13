@@ -25,11 +25,11 @@ namespace RealTimeChat.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] User newUser)
         {
-            if (_context.users.Any(u => u.Username == newUser.Username))
+            if (_context.Users.Any(u => u.Username == newUser.Username))
             {
                 return BadRequest("User already exists");
             }
-            _context.users.Add(newUser);
+            _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
             return Ok(newUser);
         }
@@ -37,7 +37,7 @@ namespace RealTimeChat.Controllers
         [HttpPost("login")]
         public IActionResult Auth([FromBody] AuthRequest request)
         {
-            var user = _context.users.FirstOrDefault(u => u.Email == request.Email && u.Password == request.Password);
+            var user = _context.Users.FirstOrDefault(u => u.Email == request.Email && u.Password == request.Password);
 
             if (user == null)
             {
@@ -47,6 +47,7 @@ namespace RealTimeChat.Controllers
             var token = GenerateJwtToken(user);
             return Ok(new AuthResponse
             {
+                Id = user.Id,
                 Token = token,
                 Username = user.Username,
                 Role = user.Role,

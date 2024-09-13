@@ -7,6 +7,7 @@ export const login = createAsyncThunk(
         try {
             const response = await axios.post('http://localhost:5000/api/auth/login', credentials);
             localStorage.setItem('token', response.data.token);
+            localStorage.setItem('id', response.data.id);
             localStorage.setItem('isAuth', response.data.isAuthenticated);
             return response.data;
         } catch (error) {
@@ -17,6 +18,7 @@ export const login = createAsyncThunk(
 
 export const logout = createAsyncThunk('auth/logout', async () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('id');
     localStorage.removeItem('isAuth');
 });
 

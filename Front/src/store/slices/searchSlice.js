@@ -4,8 +4,14 @@ import axios from 'axios';
 export const searchUsers = createAsyncThunk(
     'searchUsers',
     async (query) => {
-        const response = await axios.get(`http://localhost:5000/api/Search/usersSearch?query=${query}`);
-        return response.data;
+        if (query) {
+            const response = await axios.get(`http://localhost:5000/api/Search/usersSearch?query=${query}`);
+            return response.data;
+        }
+        else {
+            return [];
+        }
+
     }
 );
 

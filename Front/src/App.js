@@ -1,7 +1,7 @@
 import {Auth} from "./components/Auth/Auth"
 import {Messenger} from "./components/Messanger/Messenger";
 import {Sidebar} from "./components/Sidebar/Sidebar";
-import {BrowserRouter as Router, Route, Routes, Navigate} from 'react-router-dom';
+import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import {ProtectedRoute} from './rotesCapability/ProtectedRoute';
 import {PublicRoute} from "./rotesCapability/PublicdRoute";
 

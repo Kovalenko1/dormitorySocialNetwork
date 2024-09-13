@@ -1,39 +1,41 @@
 import styles from './Sidebar.module.scss';
 import SearchImg from '../../../assets/img/Search.svg';
 import ProfileImg from '../../../assets/img/Person.svg';
-import {useEffect, useState} from "react";
-import {useDispatch, useSelector} from "react-redux";
+import {useCallback, useState} from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { searchUsers } from '../../../store/slices/searchSlice';
-import {debounce} from "lodash";
+import { setSelectedChat } from "../../../store/slices/selectChatSlice";
+import { debounce } from "lodash";
+import {useSelectedChat} from "../../../hooks/useSelectedChat";
 
 export const Sidebar = () => {
     const [isFocused, setIsFocused] = useState(false);
     const [selectedFolder, setSelectedFolder] = useState('chats');
-    const [query, setQuery] = useState('');
 
     const dispatch = useDispatch();
-    const users = useSelector(state => state.search.list);
+    const searchedUsers = useSelector(state => state.search.list);
+    const { selectedChatId, bodyName } = useSelectedChat();
 
     const debouncedSearch = debounce((query) => {
         dispatch(searchUsers(query));
     }, 800);
 
-
+    const handleChatSelection = (chatId, name) => {
+        dispatch(setSelectedChat({chatId, name}));
+    };
 
     return (
         <aside className={styles.chat_sidebar}>
             <div className={styles.search_bar_container}>
                 <div className={styles.search_bar}>
                     <div className={styles.search_img_container}>
-                        <img className={styles.search_img} src={SearchImg} alt=""/>
+                        <img className={styles.search_img} src={SearchImg} alt="" />
                     </div>
                     <input
                         type="text"
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => setIsFocused(false)}
-                        onChange={(e) => {
-                            debouncedSearch(e.target.value);
-                        }}
+                        onChange={(e) => debouncedSearch(e.target.value)}
                         className={isFocused ? styles.search_focused : styles.search}
                     />
                 </div>
@@ -53,11 +55,15 @@ export const Sidebar = () => {
                 </div>
                 <div className={styles.chat_list}>
                     <ul className={styles.result_list}>
-                        {users.map(user => (
-                            <li className={styles.result_user}>
+                        {searchedUsers.map(user => (
+                            <li
+                                key={user.id}
+                                className={`${styles.result_user} ${selectedChatId === user.id ? styles.active : ''}`}
+                                onClick={() => handleChatSelection(user.id, user.username)}
+                            >
                                 <div className={styles.result_block}>
                                     <div className={styles.result_photo_block}>
-                                        <img src={ProfileImg} alt=""/>
+                                        <img src={ProfileImg} alt="" />
                                     </div>
                                     <div className={styles.result_txt_block}>
                                         <div className={styles.result_name}>{user.username}</div>
@@ -71,4 +77,4 @@ export const Sidebar = () => {
             </div>
         </aside>
     );
-}
+};

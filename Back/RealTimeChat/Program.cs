@@ -60,10 +60,6 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/Uploads"
 });
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapHub<ChatHub>("/chat");
-    endpoints.MapControllers();
-});
+app.MapHub<ChatHub>("/chat");
 
 app.Run();

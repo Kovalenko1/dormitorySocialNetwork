@@ -2,15 +2,21 @@ import style from './Header.module.scss'
 import PersonImg from '../../../../assets/img/Person.svg'
 import PhoneImg from '../../../../assets/img/Phone.svg'
 import CameraImg from '../../../../assets/img/Camera.svg'
+import {useSelector} from "react-redux";
+import {useSelectedChat} from "../../../../hooks/useSelectedChat";
 
 export const Header = () => {
+
+    const { selectedChatId, bodyName } = useSelectedChat();
+
+
     return (
         <header>
             <div className={style.friend_profile}>
                 <img className={style.friend_img} src={PersonImg} alt=""/>
                 <div className={style.friend_profile_subscription}>
                             <span className={style.friend_name}>
-                                Name
+                                {bodyName ? bodyName : 'Name'}
                             </span>
                     <span className={style.active}>
                                 Active

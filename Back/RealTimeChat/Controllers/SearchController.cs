@@ -20,7 +20,7 @@ namespace RealTimeChat.Controllers
         [HttpGet("usersSearch")]
         public async Task<IActionResult> SearchUsers(string query)
         {
-            var users = await _context.users
+            var users = await _context.Users
                 .Where(u => u.Username.Contains(query))
                 .ToListAsync();
 

@@ -3,11 +3,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RealTimeChat.Models;
 
-[Table("userconnections")]
+[Table("UserConnections")]
 public class UserConnection
 {
     [Key]
-    public required string ConnectionId { get; set; }
-    public required string Username { get; set; }
-    public required string ChatRoom { get; set; }
+    public int Id { get; set; }
+    public string ConnectionId { get; set; }
+    public int UserId { get; set; }
+    public User User { get; set; } 
+    public string ChatRoom { get; set; }
 }
