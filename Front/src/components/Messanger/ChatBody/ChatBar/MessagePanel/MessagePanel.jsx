@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {useEffect, useRef, useState} from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import style from './MessagePanel.module.scss';
 import AddImg from '../../../../../assets/img/Add.svg';
@@ -12,24 +12,60 @@ export const MessagePanel = () => {
     const startMessage = 'Написать сообщение...';
     const [placeholder, setPlaceholder] = useState(startMessage);
     const [message, setMessage] = useState('');
+    const [filePaths, setFilePaths] = useState([]);
     const { selectedChatId } = useSelectedChat();
-    const { messages, currentChatRoom, connectionStatus } = useSelector(state => state.chat);
+    const fileInputRef = useRef(null);
+    const messages = useSelector(state => state.chat.messages);
     const dispatch = useDispatch();
 
     const handleSendMessage = async () => {
-        if (message.trim()) {
+        if (message.trim() || filePaths) {
             try {
-                await dispatch(joinPrivateChat({ userId1: parseInt(localStorage.getItem('id')), userId2: parseInt(selectedChatId) })).unwrap();
+                await dispatch(joinPrivateChat({
+                    userId1: parseInt(localStorage.getItem('id')),
+                    userId2: parseInt(selectedChatId)
+                })).unwrap();
+
+                const messageObject = {
+                    text: message.trim(),
+                    file: filePaths || [],
+                };
+
                 await dispatch(sendMessageToPrivateChat({
                     user1Id: parseInt(localStorage.getItem('id')),
                     user2Id: selectedChatId,
-                    message,
+                    message: messageObject,
                 })).unwrap();
+                console.log(messageObject);
+
                 setMessage('');
+                setFilePaths([])
             } catch (error) {
                 console.error('Error sending message:', error);
             }
         }
+    };
+
+    const sendFile = async (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch("http://localhost:5000/chat/upload", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+        filePaths.push(data.filePath);
+    };
+
+    const onSendFile = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            sendFile(file);
+        }
+        console.log(filePaths);
+
     };
 
     return (
@@ -46,9 +82,10 @@ export const MessagePanel = () => {
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                 />
                 <div className={style.nav_message_bar}>
-                    <img id="addImg" src={AddImg} alt="" />
-                    <img id="smileImg" src={SmileImg} alt="" />
-                    <img id="sendImg" src={SendImg} alt="" onClick={handleSendMessage} />
+                    <input type="file" ref={fileInputRef} style={{display: 'none'}} onChange={onSendFile}/>
+                    <img id="addImg" src={AddImg} onClick={() => fileInputRef.current.click()} alt=""/>
+                    <img id="smileImg" src={SmileImg} alt=""/>
+                    <img id="sendImg" src={SendImg} alt="" onClick={handleSendMessage}/>
                 </div>
             </div>
         </div>

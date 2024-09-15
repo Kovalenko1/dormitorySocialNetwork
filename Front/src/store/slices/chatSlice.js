@@ -13,8 +13,7 @@ export const connectToChatHub = createAsyncThunk(
     'chat/connectToChatHub',
     async (_, { dispatch, rejectWithValue }) => {
         try {
-            const result = await connectService(dispatch, receiveMessage);
-            return result;
+            return await connectService(dispatch, receiveMessage);
         } catch (error) {
             return rejectWithValue('Connection failed');
         }

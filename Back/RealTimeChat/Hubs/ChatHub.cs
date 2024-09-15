@@ -7,7 +7,7 @@ namespace RealTimeChat.Hubs
 {
     public interface IChatClient
     {
-        Task ReceiveMessage(string userName, string message);
+        Task ReceiveMessage(string userName, Message message);
         Task UserJoined(string userName);
         Task UserLeft(string userName);
     }
@@ -91,7 +91,7 @@ namespace RealTimeChat.Hubs
         }
 
 
-        public async Task SendMessageToPrivateChat(int userId1, int userId2, string message)
+        public async Task SendMessageToPrivateChat(int userId1, int userId2, Message message)
         {
             var privateChat = await GetOrCreatePrivateChat(userId1, userId2);
 
@@ -128,7 +128,7 @@ namespace RealTimeChat.Hubs
             await _context.SaveChangesAsync();
         }
 
-        public async Task SendMessageToGroupChat(string groupName, string message)
+        public async Task SendMessageToGroupChat(string groupName, Message message)
         {
             var connection = await _context.UserConnections
                 .FirstOrDefaultAsync(c => c.ConnectionId == Context.ConnectionId);

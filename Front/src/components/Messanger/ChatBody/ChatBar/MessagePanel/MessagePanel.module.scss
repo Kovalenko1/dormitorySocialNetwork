@@ -4,7 +4,7 @@
 .message_panel{
   @include flex-center;
   border-radius: 16px 16px 0 0;
-  height: 4.5em;
+  min-height: 4.5em;
   background-color: $secondary-color;
 
   .input_container{
