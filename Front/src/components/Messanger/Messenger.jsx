@@ -12,8 +12,6 @@ export const Messenger = () => {
         dispatch(connectToChatHub());
     }, [dispatch]);
 
-
-
     return (
         <section className={styles.messenger}>
             <Sidebar/>

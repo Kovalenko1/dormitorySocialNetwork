@@ -2,11 +2,8 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../../store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
-// import { useDispatch } from 'react-redux';
-// import { useNavigate } from 'react-router-dom';
-// import { login, signup } from '../actions/authActions';
-
 import styles from './Auth.module.scss';
+import axios from "axios";
 
 export const Auth = () => {
     const dispatch = useDispatch();

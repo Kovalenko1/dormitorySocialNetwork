@@ -91,7 +91,7 @@ namespace RealTimeChat.Hubs
         }
 
 
-        public async Task SendMessageToPrivateChat(int userId1, int userId2, Message message)
+        public async Task SendMessageToPrivateChat(int userId1, int userId2, Message userMessage)
         {
             var privateChat = await GetOrCreatePrivateChat(userId1, userId2);
 
@@ -102,43 +102,55 @@ namespace RealTimeChat.Hubs
 
             if (connection != null)
             {
+                var message = new Message
+                {
+                    SenderId = userId1,
+                    Text = userMessage.Text,
+                    File = userMessage.File,
+                    Timestamp = DateTime.UtcNow,
+                    PrivateChatId = privateChat.Id
+                };
+                
+                _context.Messages.Add(message);
+                await _context.SaveChangesAsync();
+
                 await Clients.Group(privateChat.ChatRoomName)
                     .ReceiveMessage(connection.User.Username, message);
             }
         }
 
-        public async Task CreateAndJoinGroupChat(string groupName, Guid[] userIds)
-        {
-            var groupChat = new GroupChat();
-            _context.GroupChats.Add(groupChat);
-            await _context.SaveChangesAsync();
-
-            foreach (var userId in userIds)
-            {
-                var user = await _context.Users.FindAsync(userId);
-                if (user == null) throw new Exception($"User with ID {userId} not found");
-
-                var participant = new GroupChatParticipant();
-                _context.GroupChatParticipants.Add(participant);
-
-                await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-                await Clients.Group(groupName).UserJoined(user.Username);
-            }
-
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task SendMessageToGroupChat(string groupName, Message message)
-        {
-            var connection = await _context.UserConnections
-                .FirstOrDefaultAsync(c => c.ConnectionId == Context.ConnectionId);
-
-            if (connection != null)
-            {
-                await Clients.Group(groupName)
-                    .ReceiveMessage(connection.User.Username, message);
-            }
-        }
+        // public async Task CreateAndJoinGroupChat(string groupName, int[] userIds)
+        // {
+        //     var groupChat = new GroupChat();
+        //     _context.GroupChats.Add(groupChat);
+        //     await _context.SaveChangesAsync();
+        //
+        //     foreach (var userId in userIds)
+        //     {
+        //         var user = await _context.Users.FindAsync(userId);
+        //         if (user == null) throw new Exception($"User with ID {userId} not found");
+        //
+        //         var participant = new GroupChatParticipant();
+        //         _context.GroupChatParticipants.Add(participant);
+        //
+        //         await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+        //         await Clients.Group(groupName).UserJoined(user.Username);
+        //     }
+        //
+        //     await _context.SaveChangesAsync();
+        // }
+        //
+        // public async Task SendMessageToGroupChat(string groupName, Message message)
+        // {
+        //     var connection = await _context.UserConnections
+        //         .FirstOrDefaultAsync(c => c.ConnectionId == Context.ConnectionId);
+        //
+        //     if (connection != null)
+        //     {
+        //         await Clients.Group(groupName)
+        //             .ReceiveMessage(connection.User.Username, message);
+        //     }
+        // }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {

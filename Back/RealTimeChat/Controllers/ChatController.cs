@@ -1,36 +1,35 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using RealTimeChat.Data;
 
 namespace RealTimeChat.Controllers
 {
     [ApiController]
-    [Route("chat")]
+    [Route("api/[controller]")]
     public class ChatController : ControllerBase
     {
-        [HttpPost("upload")]
-        public async Task<IActionResult> UploadFile(IFormFile file)
+        private readonly ApplicationContext _context;
+        public ChatController(ApplicationContext context)
         {
-            if (file == null || file.Length == 0)
-                return BadRequest("No file uploaded");
-
-            var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
-
-            if (!Directory.Exists(uploadsDir))
-            {
-                Directory.CreateDirectory(uploadsDir);
-            }
-
-            var filePath = Path.Combine(uploadsDir, file.FileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            var baseUrl = $"{Request.Scheme}://{Request.Host}";
-            var fileUrl = Path.Combine(baseUrl, "Uploads", file.FileName).Replace("\\", "/");
-
-            return Ok(new { filePath = fileUrl });
+            _context = context;
         }
+        
+        [HttpGet("api/chats/user/{userId}")]
+        public async Task<IActionResult> GetUserChats(int userId)
+        {
+            var userChats = await _context.PrivateChats
+                .Where(pc => pc.User1Id == userId || pc.User2Id == userId)
+                .ToListAsync();
+
+            if (userChats == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(userChats);
+        }
+
     }
 
 }

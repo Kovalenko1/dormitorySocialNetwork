@@ -1,10 +1,10 @@
-import {useEffect, useRef, useState} from "react";
-import { useDispatch, useSelector } from 'react-redux';
+import { useRef, useState} from "react";
+import { useDispatch } from 'react-redux';
 import style from './MessagePanel.module.scss';
 import AddImg from '../../../../../assets/img/Add.svg';
 import SmileImg from '../../../../../assets/img/Smile.svg';
 import SendImg from '../../../../../assets/img/Send.svg';
-import { sendMessageToPrivateChat, joinPrivateChat } from "../../../../../store/slices/chatSlice";
+import { sendMessageToPrivateChat } from "../../../../../store/slices/chatSlice";
 import { useSelectedChat } from "../../../../../hooks/useSelectedChat";
 
 export const MessagePanel = () => {
@@ -15,24 +15,18 @@ export const MessagePanel = () => {
     const [filePaths, setFilePaths] = useState([]);
     const { selectedChatId } = useSelectedChat();
     const fileInputRef = useRef(null);
-    const messages = useSelector(state => state.chat.messages);
     const dispatch = useDispatch();
 
     const handleSendMessage = async () => {
         if (message.trim() || filePaths) {
             try {
-                await dispatch(joinPrivateChat({
-                    userId1: parseInt(localStorage.getItem('id')),
-                    userId2: parseInt(selectedChatId)
-                })).unwrap();
-
                 const messageObject = {
                     text: message.trim(),
                     file: filePaths || [],
                 };
 
                 await dispatch(sendMessageToPrivateChat({
-                    user1Id: parseInt(localStorage.getItem('id')),
+                    user1Id: parseInt(JSON.parse(localStorage.getItem('user')).id),
                     user2Id: selectedChatId,
                     message: messageObject,
                 })).unwrap();
@@ -50,7 +44,7 @@ export const MessagePanel = () => {
         const formData = new FormData();
         formData.append("file", file);
 
-        const response = await fetch("http://localhost:5000/chat/upload", {
+        const response = await fetch("http://localhost:5000/file/upload", {
             method: "POST",
             body: formData
         });

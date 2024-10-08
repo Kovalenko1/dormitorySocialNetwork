@@ -5,6 +5,7 @@ using RealTimeChat.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace RealTimeChat.Controllers
@@ -35,10 +36,16 @@ namespace RealTimeChat.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Auth([FromBody] AuthRequest request)
+        public async Task<IActionResult> Auth([FromBody] AuthRequest request)
         {
             var user = _context.Users.FirstOrDefault(u => u.Email == request.Email && u.Password == request.Password);
-
+            var userChats = await _context.PrivateChats
+                .Where(pc => pc.User1Id == user.Id)
+                .Include(pc => pc.User1)
+                .Include(pc => pc.User2)
+                .Include(pc => pc.Messages)
+                .ToListAsync();
+            
             if (user == null)
             {
                 return Unauthorized("Invalid username or password");
@@ -51,6 +58,7 @@ namespace RealTimeChat.Controllers
                 Token = token,
                 Username = user.Username,
                 Role = user.Role,
+                Chats = userChats,
             });
         }
 

@@ -1,9 +1,23 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { connectToChatHub as connectService, joinPrivateChat as joinService, sendMessageToPrivateChat as sendService, getConnection } from '../../services/chatService';
 
+const loadMessagesFromLocalStorage = () => {
+    const messages = {};
+    for (let key in localStorage) {
+        if (localStorage.hasOwnProperty(key)) {
+            try {
+                messages[key] = JSON.parse(localStorage.getItem(key));
+            } catch (e) {
+                console.error(`Ошибка при парсинге ключа ${key}:`, e);
+            }
+        }
+    }
+    return messages;
+};
+
 const initialState = {
     connectionStatus: 'disconnected',
-    messages: {},
+    messages: loadMessagesFromLocalStorage(),
     currentChatRoom: null,
     status: 'idle',
     error: null,
@@ -43,19 +57,30 @@ export const sendMessageToPrivateChat = createAsyncThunk(
     }
 );
 
+export const setChats = createAsyncThunk(
+    'chat/setChats',
+    async (chats, { rejectWithValue }) => {
+        try {
+            return chats;
+        } catch (error) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 const chatSlice = createSlice({
     name: 'chat',
     initialState,
     reducers: {
         receiveMessage: (state, action) => {
-            const { userName, message } = action.payload;
-            const chatRoom = state.currentChatRoom;
+            const { userName, message, chatRoom } = action.payload;
+            const chatRoomName = chatRoom || state.currentChatRoom;
 
-            if (chatRoom) {
-                if (!state.messages[chatRoom]) {
-                    state.messages[chatRoom] = [];
+            if (chatRoomName) {
+                if (!state.messages[chatRoomName]) {
+                    state.messages[chatRoomName] = [];
                 }
-                state.messages[chatRoom].push({ userName, message });
+                state.messages[chatRoomName].push({ userName, message });
             }
         },
     },
@@ -75,6 +100,22 @@ const chatSlice = createSlice({
                 state.error = action.payload;
             })
             .addCase(sendMessageToPrivateChat.rejected, (state, action) => {
+                state.error = action.payload;
+            })
+            .addCase(setChats.fulfilled, (state, action) => {
+                const chats = action.payload;
+                chats.forEach(chat => {
+                    state.messages[chat.chatRoomName] = chat.messages.map(msg => ({
+                        userName: msg.senderUsername, // Предполагается, что у вас есть senderUsername
+                        message: {
+                            text: msg.text,
+                            file: msg.file,
+                            timestamp: msg.timestamp,
+                        },
+                    }));
+                });
+            })
+            .addCase(setChats.rejected, (state, action) => {
                 state.error = action.payload;
             });
     },

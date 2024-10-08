@@ -1,14 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { setChats } from './chatSlice';
 
 export const login = createAsyncThunk(
     'auth/login',
-    async (credentials, thunkAPI) => {
+    async (credentials,{ dispatch, rejectWithValue }, thunkAPI) => {
         try {
             const response = await axios.post('http://localhost:5000/api/auth/login', credentials);
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('id', response.data.id);
-            localStorage.setItem('isAuth', response.data.isAuthenticated);
+            localStorage.setItem('user', JSON.stringify(response.data));
+            dispatch(setChats(response.data.chats));
             return response.data;
         } catch (error) {
             return thunkAPI.rejectWithValue(error.response.data);
@@ -17,9 +17,7 @@ export const login = createAsyncThunk(
 );
 
 export const logout = createAsyncThunk('auth/logout', async () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('id');
-    localStorage.removeItem('isAuth');
+    localStorage.clear();
 });
 
 const authSlice = createSlice({
