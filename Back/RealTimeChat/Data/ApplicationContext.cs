@@ -7,8 +7,6 @@ namespace RealTimeChat.Data
     {
         public DbSet<User> Users { get; set; }
         public DbSet<PrivateChat> PrivateChats { get; set; }
-        //public DbSet<GroupChat> GroupChats { get; set; }
-        //public DbSet<GroupChatParticipant> GroupChatParticipants { get; set; }
         public DbSet<UserConnection> UserConnections { get; set; }
         public DbSet<Message> Messages { get; set; }
 
@@ -38,20 +36,6 @@ namespace RealTimeChat.Data
                 .HasOne(m => m.PrivateChat)
                 .WithMany(pc => pc.Messages)
                 .HasForeignKey(m => m.PrivateChatId);
-            
-
-            // modelBuilder.Entity<GroupChatParticipant>()
-            //     .HasKey(gcp => new { gcp.GroupChatId, gcp.UserId });
-            //
-            // modelBuilder.Entity<GroupChatParticipant>()
-            //     .HasOne(gcp => gcp.GroupChat)
-            //     .WithMany(gc => gc.Participants)
-            //     .HasForeignKey(gcp => gcp.GroupChatId);
-            //
-            // modelBuilder.Entity<GroupChatParticipant>()
-            //     .HasOne(gcp => gcp.User)
-            //     .WithMany(u => u.GroupChatParticipants)
-            //     .HasForeignKey(gcp => gcp.UserId);
 
             base.OnModelCreating(modelBuilder);
         }

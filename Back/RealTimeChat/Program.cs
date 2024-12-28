@@ -6,6 +6,7 @@ using RealTimeChat.Data;
 using RealTimeChat.Hubs;
 using RealTimeChat;
 using System.Text;
+using RealTimeChat.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +44,8 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddSignalR();
 
 var app = builder.Build();

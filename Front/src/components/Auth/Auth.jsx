@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../../store/slices/authSlice';
+import { login, signup } from '../../store/slices/authSlice'; // <-- импортируем signup
 import { useNavigate } from 'react-router-dom';
 import styles from './Auth.module.scss';
-import axios from "axios";
 
 export const Auth = () => {
     const dispatch = useDispatch();
@@ -13,14 +12,30 @@ export const Auth = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleLoginChange = (e) => {
-        // const { name, value } = e.target;
-        // setLoginData({ ...loginData, [name]: value });
-    };
+    const [signupData, setSignupData] = useState({
+        username: '',
+        email: '',
+        password: ''
+    });
 
     const handleSignupChange = (e) => {
-        // const { name, value } = e.target;
-        // setSignupData({ ...signupData, [name]: value });
+        const { name, value } = e.target;
+        setSignupData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
+
+    const handleSignupSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const resultAction = await dispatch(signup(signupData));
+            if (signup.fulfilled.match(resultAction)) {
+                navigate('/');
+            }
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const handleLoginSubmit = async (e) => {
@@ -30,11 +45,6 @@ export const Auth = () => {
         if (login.fulfilled.match(resultAction)) {
             navigate('/');
         }
-    };
-
-    const handleSignupSubmit = async (e) => {
-        // e.preventDefault();
-        // dispatch(signup(signupData, navigate));
     };
 
     return (
@@ -50,7 +60,7 @@ export const Auth = () => {
                             name="username"
                             placeholder="Ник"
                             required
-                            // value={signupData.username}
+                            value={signupData.username}
                             onChange={handleSignupChange}
                         />
                         <input
@@ -58,7 +68,7 @@ export const Auth = () => {
                             name="email"
                             placeholder="Email"
                             required
-                            // value={signupData.email}
+                            value={signupData.email}
                             onChange={handleSignupChange}
                         />
                         <input
@@ -66,11 +76,14 @@ export const Auth = () => {
                             name="password"
                             placeholder="Пароль"
                             required
-                            // value={signupData.password}
+                            value={signupData.password}
                             onChange={handleSignupChange}
                         />
-                        <button type="submit">Зарегистрироваться</button>
+                        <button type="submit" disabled={loading}>
+                            {loading ? 'Регистрация...' : 'Зарегистрироваться'}
+                        </button>
                     </form>
+                    {error && <p style={{ color: 'red' }}>{error.title || "Произошла ошибка"}</p>}
                 </div>
 
                 <div className={styles.login}>
@@ -81,18 +94,20 @@ export const Auth = () => {
                             placeholder="Email"
                             required
                             value={email}
-                            onChange={(e)=> setEmail(e.target.value)}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
                         <input
                             type="password"
                             placeholder="Пароль"
                             required
                             value={password}
-                            onChange={(e)=> setPassword(e.target.value)}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
-                        <button type="submit" disabled={loading}>{loading ? 'Вход...' : 'Войти'}</button>
+                        <button type="submit" disabled={loading}>
+                            {loading ? 'Вход...' : 'Войти'}
+                        </button>
                     </form>
-                    {error && <p style={{color: 'red'}}>{error}</p>}
+                    {error && <p style={{ color: 'red' }}>{error.title || "Произошла ошибка"}</p>}
                 </div>
             </div>
         </main>

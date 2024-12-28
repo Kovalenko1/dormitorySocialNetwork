@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using RealTimeChat.Data;
+using RealTimeChat.Services;
 
 namespace RealTimeChat.Controllers
 {
@@ -9,27 +7,24 @@ namespace RealTimeChat.Controllers
     [Route("api/[controller]")]
     public class ChatController : ControllerBase
     {
-        private readonly ApplicationContext _context;
-        public ChatController(ApplicationContext context)
+        private readonly IChatService _chatService;
+
+        public ChatController(IChatService chatService)
         {
-            _context = context;
+            _chatService = chatService;
         }
-        
+
         [HttpGet("api/chats/user/{userId}")]
         public async Task<IActionResult> GetUserChats(int userId)
         {
-            var userChats = await _context.PrivateChats
-                .Where(pc => pc.User1Id == userId || pc.User2Id == userId)
-                .ToListAsync();
-
-            if (userChats == null)
+            var userChats = await _chatService.GetUserChatsAsync(userId);
+            
+            if (userChats == null || userChats.Count == 0)
             {
-                return NotFound();
+                return NotFound("No chats found for this user");
             }
 
             return Ok(userChats);
         }
-
     }
-
 }

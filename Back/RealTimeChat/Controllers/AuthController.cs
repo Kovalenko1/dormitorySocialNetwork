@@ -1,12 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using RealTimeChat.Data;
 using RealTimeChat.Models;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+using RealTimeChat.Services;
 
 namespace RealTimeChat.Controllers
 {
@@ -14,75 +8,39 @@ namespace RealTimeChat.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly ApplicationContext _context;
-        private readonly JwtSettings _jwtSettings;
+        private readonly IAuthService _authService;
 
-        public AuthController(ApplicationContext context, IOptions<JwtSettings> jwtSettings)
+        public AuthController(IAuthService authService)
         {
-            _context = context;
-            _jwtSettings = jwtSettings.Value;
+            _authService = authService;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] User newUser)
         {
-            if (_context.Users.Any(u => u.Username == newUser.Username))
+            try
             {
-                return BadRequest("User already exists");
+                var createdUser = await _authService.RegisterUserAsync(newUser);
+                return Ok(createdUser);
             }
-            _context.Users.Add(newUser);
-            await _context.SaveChangesAsync();
-            return Ok(newUser);
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Auth([FromBody] AuthRequest request)
+        public async Task<IActionResult> Login([FromBody] AuthRequest request)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Email == request.Email && u.Password == request.Password);
-            var userChats = await _context.PrivateChats
-                .Where(pc => pc.User1Id == user.Id)
-                .Include(pc => pc.User1)
-                .Include(pc => pc.User2)
-                .Include(pc => pc.Messages)
-                .ToListAsync();
-            
-            if (user == null)
+            try
             {
-                return Unauthorized("Invalid username or password");
+                var authResponse = await _authService.LoginAsync(request);
+                return Ok(authResponse);
             }
-
-            var token = GenerateJwtToken(user);
-            return Ok(new AuthResponse
+            catch (UnauthorizedAccessException ex)
             {
-                Id = user.Id,
-                Token = token,
-                Username = user.Username,
-                Role = user.Role,
-                Chats = userChats,
-            });
-        }
-
-        private string GenerateJwtToken(User user)
-        {
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Username),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Role, user.Role)
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: _jwtSettings.Issuer,
-                audience: _jwtSettings.Audience,
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(_jwtSettings.ExpiresInMinutes),
-                signingCredentials: creds);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+                return Unauthorized(ex.Message);
+            }
         }
     }
 }

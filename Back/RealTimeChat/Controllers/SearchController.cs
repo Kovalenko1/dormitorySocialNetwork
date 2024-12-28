@@ -2,8 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using RealTimeChat.Data;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace RealTimeChat.Controllers
 {
     [Route("api/[controller]")]
