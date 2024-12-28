@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using RealTimeChat.Data;
 using RealTimeChat.Models;
+using RealTimeChat.Services;
 
 namespace RealTimeChat.Hubs
 {
@@ -16,11 +17,13 @@ namespace RealTimeChat.Hubs
     {
         private readonly ApplicationContext _context;
         private readonly ILogger<ChatHub> _logger;
+        private readonly IRabbitMqService _rabbitMqService;
 
-        public ChatHub(ApplicationContext context, ILogger<ChatHub> logger)
+        public ChatHub(ApplicationContext context, ILogger<ChatHub> logger, IRabbitMqService rabbitMqService)
         {
             _context = context;
             _logger = logger;
+            _rabbitMqService = rabbitMqService;
         }
 
 
@@ -99,7 +102,6 @@ namespace RealTimeChat.Hubs
                 .Include(c => c.User)
                 .FirstOrDefaultAsync(c => c.ConnectionId == Context.ConnectionId);
 
-
             if (connection != null)
             {
                 var message = new Message
@@ -110,12 +112,24 @@ namespace RealTimeChat.Hubs
                     Timestamp = DateTime.UtcNow,
                     PrivateChatId = privateChat.Id
                 };
-                
+        
                 _context.Messages.Add(message);
                 await _context.SaveChangesAsync();
 
                 await Clients.Group(privateChat.ChatRoomName)
                     .ReceiveMessage(connection.User.Username, message);
+
+                var newMessageEvent = new
+                {
+                    MessageId = message.Id,
+                    SenderId = userId1,
+                    ReceiverId = (userId1 == privateChat.User1Id) 
+                        ? privateChat.User2Id 
+                        : privateChat.User1Id,
+                    Text = userMessage.Text,
+                    Timestamp = message.Timestamp
+                };
+                _rabbitMqService.PublishMessage("chat.newmessage", newMessageEvent);
             }
         }
 
