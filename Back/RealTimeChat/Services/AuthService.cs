@@ -30,6 +30,7 @@ namespace RealTimeChat.Services
 
             var passwordHasher = new PasswordHasher<User>();
             newUser.Password = passwordHasher.HashPassword(newUser, newUser.Password);
+            newUser.CreatedAt = DateTime.Now;
             
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
