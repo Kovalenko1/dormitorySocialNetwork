@@ -17,7 +17,10 @@ export const searchUsers = createAsyncThunk(
 
 const searchSlice = createSlice({
     name: 'users',
-    initialState: { list: [], status: null },
+    initialState: {
+        list: [],
+        status: null
+    },
     reducers: {},
     extraReducers: (builder) => {
         builder.addCase(searchUsers.fulfilled, (state, action) => {state.list = action.payload;})

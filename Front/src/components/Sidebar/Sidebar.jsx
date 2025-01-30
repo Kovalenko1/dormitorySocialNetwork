@@ -1,4 +1,4 @@
-import { logout } from '../../store/slices/authSlice';
+import {logout}  from '../../store/slices/authSlice';
 import {useDispatch} from "react-redux";
 import { useNavigate } from 'react-router-dom';
 import styles from './Sidebar.module.scss';
@@ -7,7 +7,7 @@ import NotifyImg from '../.././assets/img/Notify.svg'
 import AnonProfileImg from '../../assets/img/AnonProfile.png'
 import OptionsImg from '../.././assets/img/Options.svg'
 
-export const Sidebar = () => {
+const Sidebar = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     return (
@@ -26,3 +26,5 @@ export const Sidebar = () => {
         </aside>
     );
 }
+
+export default Sidebar;

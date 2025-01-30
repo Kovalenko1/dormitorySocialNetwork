@@ -8,6 +8,7 @@ export const login = createAsyncThunk(
         try {
             const response = await axios.post('http://localhost:5000/api/auth/login', credentials);
             localStorage.setItem('user', JSON.stringify(response.data));
+            console.log("user", JSON.parse(localStorage.getItem('user')));
             dispatch(setChats(response.data.chats));
             return response.data;
         } catch (error) {
@@ -21,17 +22,12 @@ export const signup = createAsyncThunk(
     async (newUserData, { dispatch, rejectWithValue }) => {
         try {
             const response = await axios.post('http://localhost:5000/api/auth/register', newUserData);
-
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
         }
     }
 );
-
-export const logout = createAsyncThunk('auth/logout', async () => {
-    localStorage.clear();
-});
 
 const authSlice = createSlice({
     name: 'auth',
@@ -42,7 +38,11 @@ const authSlice = createSlice({
         loading: false,
         error: null,
     },
-    reducers: {},
+    reducers: {
+        logout: () => {
+            localStorage.clear();
+        }
+    },
     extraReducers: (builder) => {
         builder
             .addCase(login.pending, (state) => {
@@ -66,21 +66,14 @@ const authSlice = createSlice({
             })
             .addCase(signup.fulfilled, (state, action) => {
                 state.loading = false;
-
                 state.user = action.payload;
-
             })
             .addCase(signup.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
-            })
-
-            .addCase(logout.fulfilled, (state) => {
-                state.isAuthenticated = false;
-                state.user = null;
-                state.token = null;
             });
     },
 });
 
+export const { logout } = authSlice.actions;
 export default authSlice.reducer;

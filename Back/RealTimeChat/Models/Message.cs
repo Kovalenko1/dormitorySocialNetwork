@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace RealTimeChat.Models
@@ -7,16 +8,20 @@ namespace RealTimeChat.Models
     {
         [Key]
         public int Id { get; set; }
+        public string ChatName { get; set; }
         public int SenderId { get; set; }
+        public int ReceiverId { get; set; }
         public string Text { get; set; }
-        public List<string> File { get; set; }
+        
+        [Column(TypeName = "text[]")]
+        public string[] File { get; set; } = System.Array.Empty<string>();
         public DateTime Timestamp { get; set; }
-        public int PrivateChatId { get; set; }
-
         [JsonIgnore]
         public User Sender { get; set; }
         
+        public int PrivateChatId { get; set; }
         [JsonIgnore]
+        [ForeignKey(nameof(Id))]
         public PrivateChat PrivateChat { get; set; }
     }
 }

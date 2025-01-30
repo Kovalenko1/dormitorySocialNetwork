@@ -5,13 +5,17 @@ let connection = null;
 export const getConnection = () => connection;
 
 export const connectToChatHub = async (dispatch, receiveMessage) => {
+
+    const userId = JSON.parse(localStorage.getItem('user')).id;
+
     connection = new signalR.HubConnectionBuilder()
-        .withUrl('http://localhost:5000/chat')
+        .withUrl(`http://localhost:5000/chat?userId=${userId}`)
         .withAutomaticReconnect()
         .build();
 
-    connection.on('ReceiveMessage', (userName, message) => {
-        dispatch(receiveMessage({ userName, message }));
+    connection.on('ReceiveMessage', (chatId, message) => {
+        console.log("chats", chatId, message);
+        dispatch(receiveMessage({ chatId, message }));
     });
 
     try {
@@ -23,12 +27,3 @@ export const connectToChatHub = async (dispatch, receiveMessage) => {
     }
 };
 
-export const joinPrivateChat = async (userId1, userId2) => {
-    if (!connection) throw new Error('Not connected');
-    await connection.invoke('JoinPrivateChat', userId1, userId2);
-};
-
-export const sendMessageToPrivateChat = async (user1Id, user2Id, message) => {
-    if (!connection) throw new Error('Not connected');
-    await connection.invoke('SendMessageToPrivateChat', user1Id, user2Id, message);
-};

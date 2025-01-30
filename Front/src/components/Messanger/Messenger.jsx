@@ -5,7 +5,7 @@ import {useEffect} from "react";
 import {connectToChatHub} from "../../store/slices/chatSlice";
 import {useDispatch} from "react-redux";
 
-export const Messenger = () => {
+const Messenger = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -20,3 +20,5 @@ export const Messenger = () => {
 
     );
 };
+
+export default Messenger;

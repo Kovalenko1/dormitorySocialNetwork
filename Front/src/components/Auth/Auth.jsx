@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { login, signup } from '../../store/slices/authSlice'; // <-- импортируем signup
+import { login, signup } from '../../store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 import styles from './Auth.module.scss';
 
-export const Auth = () => {
+const Auth = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { loading, error } = useSelector((state) => state.auth);
@@ -30,8 +30,16 @@ export const Auth = () => {
         e.preventDefault();
         try {
             const resultAction = await dispatch(signup(signupData));
+
             if (signup.fulfilled.match(resultAction)) {
-                navigate('/');
+                const loginAction = await dispatch(login({
+                    email: signupData.email,
+                    password: signupData.password,
+                }));
+
+                if (login.fulfilled.match(loginAction)) {
+                    navigate('/');
+                }
             }
         } catch (err) {
             console.error(err);
@@ -40,10 +48,14 @@ export const Auth = () => {
 
     const handleLoginSubmit = async (e) => {
         e.preventDefault();
-        const resultAction = await dispatch(login({ email, password }));
+        try {
+            const resultAction = await dispatch(login({ email, password }));
 
-        if (login.fulfilled.match(resultAction)) {
-            navigate('/');
+            if (login.fulfilled.match(resultAction)) {
+                navigate('/');
+            }
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -113,3 +125,5 @@ export const Auth = () => {
         </main>
     );
 };
+
+export default Auth;

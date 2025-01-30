@@ -7,24 +7,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace RealTimeChat.Migrations
 {
     /// <inheritdoc />
-    public partial class Initialize : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "GroupChats",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    GroupName = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GroupChats", x => x.Id);
-                });
-
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -38,6 +25,7 @@ namespace RealTimeChat.Migrations
                     FirstName = table.Column<string>(type: "text", nullable: true),
                     LastName = table.Column<string>(type: "text", nullable: true),
                     Bio = table.Column<string>(type: "text", nullable: true),
+                    Photo = table.Column<string[]>(type: "text[]", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -46,39 +34,16 @@ namespace RealTimeChat.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "GroupChatParticipants",
-                columns: table => new
-                {
-                    GroupChatId = table.Column<int>(type: "integer", nullable: false),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GroupChatParticipants", x => new { x.GroupChatId, x.UserId });
-                    table.ForeignKey(
-                        name: "FK_GroupChatParticipants_GroupChats_GroupChatId",
-                        column: x => x.GroupChatId,
-                        principalTable: "GroupChats",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_GroupChatParticipants_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PrivateChats",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ChatRoomName = table.Column<string>(type: "text", nullable: false),
+                    RoomName = table.Column<string>(type: "text", nullable: false),
                     User1Id = table.Column<int>(type: "integer", nullable: false),
-                    User2Id = table.Column<int>(type: "integer", nullable: false)
+                    User2Id = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<int>(type: "integer", nullable: true),
+                    UserId1 = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -88,13 +53,23 @@ namespace RealTimeChat.Migrations
                         column: x => x.User1Id,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_PrivateChats_Users_User2Id",
                         column: x => x.User2Id,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PrivateChats_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_PrivateChats_Users_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -118,10 +93,46 @@ namespace RealTimeChat.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Messages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ChatName = table.Column<string>(type: "text", nullable: false),
+                    SenderId = table.Column<int>(type: "integer", nullable: false),
+                    ReceiverId = table.Column<int>(type: "integer", nullable: false),
+                    Text = table.Column<string>(type: "text", nullable: false),
+                    File = table.Column<string[]>(type: "text[]", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    PrivateChatId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Messages_PrivateChats_PrivateChatId",
+                        column: x => x.PrivateChatId,
+                        principalTable: "PrivateChats",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Messages_Users_SenderId",
+                        column: x => x.SenderId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
-                name: "IX_GroupChatParticipants_UserId",
-                table: "GroupChatParticipants",
-                column: "UserId");
+                name: "IX_Messages_PrivateChatId",
+                table: "Messages",
+                column: "PrivateChatId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_SenderId",
+                table: "Messages",
+                column: "SenderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PrivateChats_User1Id",
@@ -134,6 +145,16 @@ namespace RealTimeChat.Migrations
                 column: "User2Id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PrivateChats_UserId",
+                table: "PrivateChats",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PrivateChats_UserId1",
+                table: "PrivateChats",
+                column: "UserId1");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserConnections_UserId",
                 table: "UserConnections",
                 column: "UserId");
@@ -143,16 +164,13 @@ namespace RealTimeChat.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "GroupChatParticipants");
-
-            migrationBuilder.DropTable(
-                name: "PrivateChats");
+                name: "Messages");
 
             migrationBuilder.DropTable(
                 name: "UserConnections");
 
             migrationBuilder.DropTable(
-                name: "GroupChats");
+                name: "PrivateChats");
 
             migrationBuilder.DropTable(
                 name: "Users");

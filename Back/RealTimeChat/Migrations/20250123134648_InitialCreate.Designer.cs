@@ -12,8 +12,8 @@ using RealTimeChat.Data;
 namespace RealTimeChat.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20240906152236_Initialize")]
-    partial class Initialize
+    [Migration("20250123134648_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace RealTimeChat.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("RealTimeChat.Models.GroupChat", b =>
+            modelBuilder.Entity("RealTimeChat.Models.Message", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,31 +33,37 @@ namespace RealTimeChat.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("GroupName")
+                    b.Property<string>("ChatName")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string[]>("File")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<int>("PrivateChatId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ReceiverId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
 
-                    b.ToTable("GroupChats");
-                });
+                    b.HasIndex("PrivateChatId");
 
-            modelBuilder.Entity("RealTimeChat.Models.GroupChatParticipant", b =>
-                {
-                    b.Property<int>("GroupChatId")
-                        .HasColumnType("integer");
+                    b.HasIndex("SenderId");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
-
-                    b.HasKey("GroupChatId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("GroupChatParticipants");
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("RealTimeChat.Models.PrivateChat", b =>
@@ -68,7 +74,7 @@ namespace RealTimeChat.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ChatRoomName")
+                    b.Property<string>("RoomName")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -78,11 +84,21 @@ namespace RealTimeChat.Migrations
                     b.Property<int>("User2Id")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("UserId1")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("User1Id");
 
                     b.HasIndex("User2Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("PrivateChats");
                 });
@@ -114,6 +130,9 @@ namespace RealTimeChat.Migrations
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string[]>("Photo")
+                        .HasColumnType("text[]");
 
                     b.Property<string>("Role")
                         .IsRequired()
@@ -154,23 +173,23 @@ namespace RealTimeChat.Migrations
                     b.ToTable("UserConnections");
                 });
 
-            modelBuilder.Entity("RealTimeChat.Models.GroupChatParticipant", b =>
+            modelBuilder.Entity("RealTimeChat.Models.Message", b =>
                 {
-                    b.HasOne("RealTimeChat.Models.GroupChat", "GroupChat")
-                        .WithMany("Participants")
-                        .HasForeignKey("GroupChatId")
+                    b.HasOne("RealTimeChat.Models.PrivateChat", "PrivateChat")
+                        .WithMany("Messages")
+                        .HasForeignKey("PrivateChatId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RealTimeChat.Models.User", "User")
-                        .WithMany("GroupChatParticipants")
-                        .HasForeignKey("UserId")
+                    b.HasOne("RealTimeChat.Models.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("GroupChat");
+                    b.Navigation("PrivateChat");
 
-                    b.Navigation("User");
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("RealTimeChat.Models.PrivateChat", b =>
@@ -178,14 +197,22 @@ namespace RealTimeChat.Migrations
                     b.HasOne("RealTimeChat.Models.User", "User1")
                         .WithMany()
                         .HasForeignKey("User1Id")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("RealTimeChat.Models.User", "User2")
                         .WithMany()
                         .HasForeignKey("User2Id")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("RealTimeChat.Models.User", null)
+                        .WithMany("PrivateChatsAsUser1")
+                        .HasForeignKey("UserId");
+
+                    b.HasOne("RealTimeChat.Models.User", null)
+                        .WithMany("PrivateChatsAsUser2")
+                        .HasForeignKey("UserId1");
 
                     b.Navigation("User1");
 
@@ -203,16 +230,18 @@ namespace RealTimeChat.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("RealTimeChat.Models.GroupChat", b =>
+            modelBuilder.Entity("RealTimeChat.Models.PrivateChat", b =>
                 {
-                    b.Navigation("Participants");
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("RealTimeChat.Models.User", b =>
                 {
                     b.Navigation("Connections");
 
-                    b.Navigation("GroupChatParticipants");
+                    b.Navigation("PrivateChatsAsUser1");
+
+                    b.Navigation("PrivateChatsAsUser2");
                 });
 #pragma warning restore 612, 618
         }

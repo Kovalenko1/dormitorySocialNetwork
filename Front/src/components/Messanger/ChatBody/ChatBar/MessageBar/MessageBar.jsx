@@ -4,7 +4,12 @@ import { useEffect } from "react";
 
 export const MessageBar = () => {
     const messages = useSelector(state => state.chat.messages);
-    const currentChatRoom = useSelector(state => state.chat.currentChatRoom);
+    console.log("message", messages);
+    const selectedChatId = useSelector(state => state.selectChat.selectedChatId);
+    const currentChatRoom = [JSON.parse(localStorage.getItem('user')).id, selectedChatId]
+        .sort((a, b) => a - b)[0]
+        + "-" +
+        [JSON.parse(localStorage.getItem('user')).id, selectedChatId].sort((a, b) => a - b)[1];
 
     useEffect(() => {
         if (currentChatRoom && messages[currentChatRoom]) {
@@ -17,9 +22,9 @@ export const MessageBar = () => {
             {messages[currentChatRoom] && messages[currentChatRoom].length > 0 ? (
                 messages[currentChatRoom].map((msg, index) => (
                     <div key={index} className={style.message}>
-                        {msg.message.file && Array.isArray(msg.message.file) && (
+                        {msg.file && Array.isArray(msg.file) && (
                             <div>
-                                {msg.message.file.map((file, fileIndex) => (
+                                {msg.file.map((file, fileIndex) => (
                                     <div key={fileIndex}>
                                         {/\.(jpeg|jpg|gif|png|svg|webp)$/i.test(file) ? (
                                             <img src={file} alt={`file-${fileIndex + 1}`} />
@@ -37,7 +42,7 @@ export const MessageBar = () => {
                                 ))}
                             </div>
                         )}
-                        {msg.message.text && <div className={style.text}>{msg.message.text}</div>}
+                        {msg.text && <div className={style.text}>{msg.text}</div>}
                     </div>
                 ))
             ) : (

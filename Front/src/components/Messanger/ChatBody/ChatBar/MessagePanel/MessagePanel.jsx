@@ -6,6 +6,7 @@ import SmileImg from '../../../../../assets/img/Smile.svg';
 import SendImg from '../../../../../assets/img/Send.svg';
 import { sendMessageToPrivateChat } from "../../../../../store/slices/chatSlice";
 import { useSelectedChat } from "../../../../../hooks/useSelectedChat";
+import { getConnection } from '../../../../../services/chatService'
 
 export const MessagePanel = () => {
 
@@ -24,13 +25,13 @@ export const MessagePanel = () => {
                     text: message.trim(),
                     file: filePaths || [],
                 };
-
-                await dispatch(sendMessageToPrivateChat({
-                    user1Id: parseInt(JSON.parse(localStorage.getItem('user')).id),
-                    user2Id: selectedChatId,
-                    message: messageObject,
-                })).unwrap();
-                console.log(messageObject);
+                const connection = getConnection();
+                await connection.invoke("SendMessage", {
+                    senderId: parseInt(JSON.parse(localStorage.getItem('user')).id),
+                    receiverId: selectedChatId,
+                    text: messageObject.text,
+                    file: messageObject.file
+                });
 
                 setMessage('');
                 setFilePaths([])
@@ -58,8 +59,6 @@ export const MessagePanel = () => {
         if (file) {
             sendFile(file);
         }
-        console.log(filePaths);
-
     };
 
     return (

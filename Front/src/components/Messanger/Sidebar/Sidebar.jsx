@@ -7,7 +7,6 @@ import { searchUsers } from '../../../store/slices/searchSlice';
 import { setSelectedChat } from "../../../store/slices/selectChatSlice";
 import { debounce } from "lodash";
 import {useSelectedChat} from "../../../hooks/useSelectedChat";
-import {joinPrivateChat} from "../../../store/slices/chatSlice";
 
 export const Sidebar = () => {
     const [isFocused, setIsFocused] = useState(false);
@@ -23,18 +22,12 @@ export const Sidebar = () => {
 
     const handleChatSelection = (chatId, name) => {
         dispatch(setSelectedChat({chatId, name}));
-        dispatch(joinPrivateChat({
-            userId1: parseInt(JSON.parse(localStorage.getItem('user')).id),
-            userId2: parseInt(chatId)
-        })).unwrap();
     };
 
     const getOtherUser = (chat) => {
         return chat.user1Id === JSON.parse(localStorage.getItem('user')).id ? chat.user2 : chat.user1;
     };
 
-    if (searchedUsers.length > 0) console.log(searchedUsers)
-    console.log(JSON.parse(localStorage.getItem('user')).chats);
     return (
         <aside className={styles.chat_sidebar}>
             <div className={styles.search_bar_container}>
