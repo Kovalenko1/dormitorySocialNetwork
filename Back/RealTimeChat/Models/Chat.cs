@@ -3,11 +3,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RealTimeChat.Models
 {
-    public class PrivateChat
+    public class Chat
     {
         [Key]
         public int Id { get; set; }
-        public string RoomName { get; set; }
+        
+        [Required]
+        public string ChatName { get; set; }
+        
+        [Required]
+        public ChatType Type { get; set; }
         public int User1Id { get; set; }
         public int User2Id { get; set; }
         
@@ -16,7 +21,7 @@ namespace RealTimeChat.Models
         
         [ForeignKey(nameof(User2Id))]
         public User User2 { get; set; }
-        
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public ICollection<Message> Messages { get; set; }
     }
 }

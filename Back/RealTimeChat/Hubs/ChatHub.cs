@@ -70,7 +70,7 @@ namespace RealTimeChat.Hubs
                     if (user != null)
                     {
                         var chat = await _context.PrivateChats
-                            .FirstOrDefaultAsync(pc => pc.RoomName == connection.ChatRoom);
+                            .FirstOrDefaultAsync(pc => pc.ChatName == connection.ChatRoom);
 
                         if (chat != null)
                         {
@@ -99,13 +99,13 @@ namespace RealTimeChat.Hubs
 
             foreach (var chat in privateChats)
             {
-                await Groups.AddToGroupAsync(Context.ConnectionId, chat.RoomName);
+                await Groups.AddToGroupAsync(Context.ConnectionId, chat.ChatName);
 
                 var userConn = new UserConnection
                 {
                     ConnectionId = Context.ConnectionId,
                     UserId = userId,
-                    ChatRoom = chat.RoomName
+                    ChatRoom = chat.ChatName
                 };
                 _context.UserConnections.Add(userConn);
             }
@@ -127,7 +127,7 @@ namespace RealTimeChat.Hubs
                 var otherUser = await _context.Users.FindAsync(otherUserId);
 
                 var lastMessage = await _context.Messages
-                    .Where(m => m.PrivateChatId == chat.Id)
+                    .Where(m => m.ChatId == chat.Id)
                     .OrderByDescending(m => m.Timestamp)
                     .FirstOrDefaultAsync();
 
@@ -153,7 +153,7 @@ namespace RealTimeChat.Hubs
                 throw new Exception("User not a participant of this chat");
 
             var messages = await _context.Messages
-                .Where(m => m.PrivateChatId == chat.Id)
+                .Where(m => m.ChatId == chat.Id)
                 .OrderBy(m => m.Timestamp)
                 .ToListAsync();
 
@@ -173,8 +173,8 @@ namespace RealTimeChat.Hubs
             
             var message = new Message
             {
-                ChatName = chat.RoomName,
-                PrivateChatId = chat.Id,
+                ChatName = chat.ChatName,
+                ChatId = chat.Id,
                 SenderId = userMessage.SenderId,
                 ReceiverId = userMessage.ReceiverId,
                 Text = userMessage.Text,
@@ -185,8 +185,8 @@ namespace RealTimeChat.Hubs
             _context.Messages.Add(message);
             await _context.SaveChangesAsync();
 
-            await Clients.Group(chat.RoomName)
-                .ReceiveMessage(chat.RoomName, message);
+            await Clients.Group(chat.ChatName)
+                .ReceiveMessage(chat.ChatName, message);
 
             await UpdateChatListForParticipants(chat, message);
 
@@ -205,13 +205,13 @@ namespace RealTimeChat.Hubs
             _rabbitMqService.PublishMessage("chat.newmessage", newMessageEvent);
         }
 
-        private async Task UpdateChatListForParticipants(PrivateChat chat, Message lastMessage)
+        private async Task UpdateChatListForParticipants(Chat chat, Message lastMessage)
         {
             await UpdateSingleParticipant(chat, lastMessage, chat.User1Id);
             await UpdateSingleParticipant(chat, lastMessage, chat.User2Id);
         }
 
-        private async Task UpdateSingleParticipant(PrivateChat chat, Message lastMessage, int participantId)
+        private async Task UpdateSingleParticipant(Chat chat, Message lastMessage, int participantId)
         {
             var otherUserId = (chat.User1Id == participantId) ? chat.User2Id : chat.User1Id;
             var otherUser = await _context.Users.FindAsync(otherUserId);
@@ -224,16 +224,16 @@ namespace RealTimeChat.Hubs
                 LastMessageTime = lastMessage.Timestamp
             };
 
-            await Clients.Group(chat.RoomName)
+            await Clients.Group(chat.ChatName)
                 .UpdateChatList(summary);
         }
 
-        public async Task<PrivateChat> CreateOrGetChatWithUser(int currentUserId, int otherUserId)
+        public async Task<Chat> CreateOrGetChatWithUser(int currentUserId, int otherUserId)
         {
             var chatRoomName = GenerateChatRoomName(currentUserId, otherUserId);
 
             var privateChat = await _context.PrivateChats
-                .FirstOrDefaultAsync(pc => pc.RoomName == chatRoomName);
+                .FirstOrDefaultAsync(pc => pc.ChatName == chatRoomName);
 
             if (privateChat == null)
             {
@@ -245,11 +245,11 @@ namespace RealTimeChat.Hubs
                     throw new Exception("Один из пользователей не существует.");
                 }
 
-                privateChat = new PrivateChat
+                privateChat = new Chat
                 {
                     User1Id = currentUserId,
                     User2Id = otherUserId,
-                    RoomName = chatRoomName
+                    ChatName = chatRoomName
                 };
                 _context.PrivateChats.Add(privateChat);
                 await _context.SaveChangesAsync();

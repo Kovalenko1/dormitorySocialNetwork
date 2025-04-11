@@ -13,5 +13,4 @@ public class UserConnection
     
     [ForeignKey(nameof(UserId))]
     public User User { get; set; } 
-    public string ChatRoom { get; set; }
 }

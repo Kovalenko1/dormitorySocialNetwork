@@ -4,6 +4,6 @@ namespace RealTimeChat.Services
 {
     public interface IChatService
     {
-        Task<List<PrivateChat>> GetUserChatsAsync(int userId);
+        Task<List<Chat>> GetUserChatsAsync(int userId);
     }
 }

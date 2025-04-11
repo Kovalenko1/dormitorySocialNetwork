@@ -32,5 +32,4 @@ namespace RealTimeChat.Controllers
             return Ok(new { filePath = fileUrl });
         }
     }
-
 }

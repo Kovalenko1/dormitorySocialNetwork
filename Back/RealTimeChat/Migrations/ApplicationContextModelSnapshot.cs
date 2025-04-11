@@ -63,7 +63,7 @@ namespace RealTimeChat.Migrations
                     b.ToTable("Messages");
                 });
 
-            modelBuilder.Entity("RealTimeChat.Models.PrivateChat", b =>
+            modelBuilder.Entity("RealTimeChat.Models.Chat", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -172,7 +172,7 @@ namespace RealTimeChat.Migrations
 
             modelBuilder.Entity("RealTimeChat.Models.Message", b =>
                 {
-                    b.HasOne("RealTimeChat.Models.PrivateChat", "PrivateChat")
+                    b.HasOne("RealTimeChat.Models.Chat", "Chat")
                         .WithMany("Messages")
                         .HasForeignKey("PrivateChatId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -184,12 +184,12 @@ namespace RealTimeChat.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("PrivateChat");
+                    b.Navigation("Chat");
 
                     b.Navigation("Sender");
                 });
 
-            modelBuilder.Entity("RealTimeChat.Models.PrivateChat", b =>
+            modelBuilder.Entity("RealTimeChat.Models.Chat", b =>
                 {
                     b.HasOne("RealTimeChat.Models.User", "User1")
                         .WithMany()
@@ -227,7 +227,7 @@ namespace RealTimeChat.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("RealTimeChat.Models.PrivateChat", b =>
+            modelBuilder.Entity("RealTimeChat.Models.Chat", b =>
                 {
                     b.Navigation("Messages");
                 });

@@ -16,18 +16,25 @@ namespace RealTimeChat.Models
         public required string Email { get; set; }
         
         [Required]
-        public required string Password { get; set; }
+        public required string PasswordHash { get; set; }
+        [Required]
         public string Role { get; set; } = "user";
+        public int? Room { get; set; }
+        public string? Phone { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Bio { get; set; }
         
+        public int? DormitoryId { get; set; }
+        public int? RoomId { get; set; }
+        
         [Column(TypeName = "text[]")]
         public string[]? Photo { get; set; } = System.Array.Empty<string>();
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime LastSeenAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        
+        public ICollection<Message> Messages { get; set; }
         public List<UserConnection>? Connections { get; set; }
-        public List<PrivateChat>? PrivateChatsAsUser1 { get; set; }
-        public List<PrivateChat>? PrivateChatsAsUser2 { get; set; }
     }
 }

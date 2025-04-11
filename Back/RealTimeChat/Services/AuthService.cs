@@ -29,7 +29,7 @@ namespace RealTimeChat.Services
             }
 
             var passwordHasher = new PasswordHasher<User>();
-            newUser.Password = passwordHasher.HashPassword(newUser, newUser.Password);
+            newUser.PasswordHash = passwordHasher.HashPassword(newUser, newUser.PasswordHash);
             newUser.CreatedAt = DateTime.UtcNow;
             
             _context.Users.Add(newUser);
@@ -47,7 +47,7 @@ namespace RealTimeChat.Services
                 throw new UnauthorizedAccessException("Invalid username or password");
 
             var passwordHasher = new PasswordHasher<User>();
-            var verifyResult = passwordHasher.VerifyHashedPassword(user, user.Password, request.Password);
+            var verifyResult = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
             if (verifyResult == PasswordVerificationResult.Failed)
                 throw new UnauthorizedAccessException("Invalid username or password");
 

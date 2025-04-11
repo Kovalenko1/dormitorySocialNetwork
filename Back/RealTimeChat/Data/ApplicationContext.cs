@@ -6,7 +6,7 @@ namespace RealTimeChat.Data
     public class ApplicationContext : DbContext
     {
         public DbSet<User> Users { get; set; } = null!;
-        public DbSet<PrivateChat> PrivateChats { get; set; } = null!;
+        public DbSet<Chat> PrivateChats { get; set; } = null!;
         public DbSet<UserConnection> UserConnections { get; set; } = null!;
         public DbSet<Message> Messages { get; set; } = null!;
 
@@ -17,20 +17,20 @@ namespace RealTimeChat.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<PrivateChat>()
+            modelBuilder.Entity<Chat>()
                 .HasOne(pc => pc.User1)
                 .WithMany()
                 .HasForeignKey(pc => pc.User1Id)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<PrivateChat>()
+            modelBuilder.Entity<Chat>()
                 .HasOne(pc => pc.User2)
                 .WithMany()
                 .HasForeignKey(pc => pc.User2Id)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Message>()
-                .HasOne(m => m.PrivateChat)
+                .HasOne(m => m.Chats)
                 .WithMany(pc => pc.Messages)
                 .HasForeignKey(m => m.PrivateChatId)
                 .OnDelete(DeleteBehavior.Cascade);

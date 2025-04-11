@@ -13,7 +13,7 @@ namespace RealTimeChat.Services
             _context = context;
         }
 
-        public async Task<List<PrivateChat>> GetUserChatsAsync(int userId)
+        public async Task<List<Chat>> GetUserChatsAsync(int userId)
         {
             return await _context.PrivateChats
                 .Where(pc => pc.User1Id == userId || pc.User2Id == userId)

@@ -16,12 +16,12 @@ namespace RealTimeChat.Models
         [Column(TypeName = "text[]")]
         public string[] File { get; set; } = System.Array.Empty<string>();
         public DateTime Timestamp { get; set; }
+        
         [JsonIgnore]
         public User Sender { get; set; }
-        
-        public int PrivateChatId { get; set; }
+        public int ChatId { get; set; }
         [JsonIgnore]
         [ForeignKey(nameof(Id))]
-        public PrivateChat PrivateChat { get; set; }
+        public Chat Chat { get; set; }
     }
 }
