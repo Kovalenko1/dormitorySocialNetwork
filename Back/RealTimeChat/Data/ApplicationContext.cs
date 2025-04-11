@@ -30,9 +30,9 @@ namespace RealTimeChat.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Message>()
-                .HasOne(m => m.Chats)
+                .HasOne(m => m.Chat)
                 .WithMany(pc => pc.Messages)
-                .HasForeignKey(m => m.PrivateChatId)
+                .HasForeignKey(m => m.ChatId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<UserConnection>()
