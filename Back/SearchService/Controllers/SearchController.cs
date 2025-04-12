@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RealTimeChat.Data;
+using SearchService.Data;
 
 namespace RealTimeChat.Controllers
 {
