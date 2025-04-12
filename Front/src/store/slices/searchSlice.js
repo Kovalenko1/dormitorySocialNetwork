@@ -5,7 +5,7 @@ export const searchUsers = createAsyncThunk(
     'searchUsers',
     async (query) => {
         if (query) {
-            const response = await axios.get(`http://localhost:5000/api/Search/usersSearch?query=${query}`);
+            const response = await axios.get(`http://localhost:5001/api/Search/usersSearch?query=${query}`);
             return response.data;
         }
         else {
